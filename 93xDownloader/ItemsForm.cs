@@ -23,7 +23,7 @@ namespace Downloader_93x
                 }));
             }
             listView3.EndUpdate();
-            label1.Text = "Item Type:" + title;
+            label1.Text = "Source:" + title;
             this.main = main;
         }
 
@@ -63,5 +63,14 @@ namespace Downloader_93x
         {
 
         }
+
+        private void listView3_MouseClick(object sender,MouseEventArgs e)
+        {
+            if(e.Button == MouseButtons.Right && listView3.SelectedItems.Count == 1)
+            {
+                Clipboard.SetText(listView3.SelectedItems[0].SubItems[1].Text);
+            }
+        }
+
     }
 }

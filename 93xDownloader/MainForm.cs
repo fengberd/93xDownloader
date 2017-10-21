@@ -92,17 +92,34 @@ namespace Downloader_93x
                     }
                     try
                     {
-                        using(var http = Web.HttpGetStream(url))
+                        using(var http = Web.HttpGetStream(url,out long web_size))
                         {
                             var input = http;
                             if(bz2_mode)
                             {
                                 input = new BZip2InputStream(input);
                             }
+                            else if(size < 0 && web_size > 0)
+                            {
+                                size = web_size;
+                                Invoke(new Action(() =>
+                                {
+                                    item.SubItems[2].Text = size.ToString();
+                                    item.SubItems[3].Text = Program.FormatSize(size);
+                                }));
+                                if(File.Exists(path) && size > 0 && new FileInfo(path).Length == size)
+                                {
+                                    Invoke(new Action(() =>
+                                    {
+                                        listView2.Items.Remove(item);
+                                    }));
+                                    return;
+                                }
+                            }
                             using(var output = File.Create(path,81920))
                             {
-                                long processed = 0;
                                 int read;
+                                long processed = 0;
                                 byte[] buffer = new byte[81920];
                                 while((read = input.Read(buffer,0,buffer.Length)) > 0)
                                 {
@@ -139,7 +156,7 @@ namespace Downloader_93x
         {
             lock(download_speed_locker)
             {
-                label3.Text = "Speed: " + Program.FormatSize(download_speed) + "/s";
+                label3.Text = "(Decompress)Speed: " + Program.FormatSize(download_speed) + "/s";
                 download_speed = 0;
             }
         }
@@ -175,13 +192,12 @@ namespace Downloader_93x
                             string[] split = row.Split(new[] { "--" },StringSplitOptions.None);
                             if(split.Length >= 2)
                             {
-                                items.Add(split[0],new ItemToDownload()
+                                items[split[0]] = new ItemToDownload()
                                 {
                                     url = split[1].Replace("\r",""),
                                     size = split.Length >= 3 ? long.Parse(split[2]) : -1
-                                });
+                                };
                             }
-
                         }
                         Invoke(new Action(() =>
                         {
