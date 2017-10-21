@@ -68,7 +68,7 @@ namespace Downloader_93x
             {
                 var add = listView3.Items[0];
                 listView3.Items.Remove(add);
-                add.SubItems.Add(new ListViewItem.ListViewSubItem());
+                add.SubItems.Add(new ListViewItem.ListViewSubItem(add,"CONNECT"));
                 ThreadPool.QueueUserWorkItem(new WaitCallback((obj) =>
                 {
                     var item = obj as ListViewItem;
@@ -177,7 +177,7 @@ namespace Downloader_93x
                             {
                                 items.Add(split[0],new ItemToDownload()
                                 {
-                                    url = split[1],
+                                    url = split[1].Replace("\r",""),
                                     size = split.Length >= 3 ? long.Parse(split[2]) : -1
                                 });
                             }
